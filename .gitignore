@@ -1,0 +1,6 @@
+*.iso
+*.d
+*.o
+*.log
+*.bin
+*.status
