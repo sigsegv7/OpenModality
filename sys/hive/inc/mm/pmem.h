@@ -35,4 +35,22 @@
  */
 void mm_pmem_init(void);
 
+/*
+ * Allocate one or more physical memory frames
+ *
+ * @count: Number of frames to allocate
+ *
+ * Returns the base address of the allocated physical
+ * memory region
+ */
+uintptr_t mm_pmem_alloc(size_t count);
+
+/*
+ * Free one or more physical memory frames
+ *
+ * @base: Base address of memory to free
+ * @count: Number of frames to free
+ */
+void mm_pmem_free(uintptr_t base, size_t count);
+
 #endif  /* !_MM_PSEG_H_ */

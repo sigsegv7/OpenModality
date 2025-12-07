@@ -34,6 +34,7 @@
 #include <lib/string.h>
 #include <lib/stdbool.h>
 #include <mm/memvar.h>
+#include <core/spinlock.h>
 #include <core/bpt.h>
 #include <core/trace.h>
 
@@ -46,6 +47,8 @@ static size_t mem_usable = 0;
 /* Bitmap */
 static size_t bitmap_size = 0;
 static uint8_t *bitmap = NULL;
+static size_t last_bit = 0;
+static spinlock_t bitmap_lock = 0;
 
 /*
  * Display size values in a pretty format
@@ -172,9 +175,79 @@ pmem_probe(void)
     pmem_print_size("bitmap", bitmap_size);
 }
 
+/*
+ * Allocate one or more physical memory frames
+ */
+static uintptr_t
+pmem_alloc(size_t count)
+{
+    ssize_t start_idx = -1;
+    size_t frames_found = 0;
+    uintptr_t phys = 0;
+    size_t max_bit;
+
+    max_bit = usable_top / PAGESIZE;
+    for (size_t i = last_bit; i < max_bit; ++i) {
+        if (TESTBIT(bitmap, i)) {
+            frames_found = 0;
+            start_idx = -1;
+            continue;
+        }
+
+        /* Keep track of region start */
+        if (start_idx < 0) {
+            start_idx = i;
+        }
+
+        /* Did we find the requested count? */
+        if ((frames_found++) >= count) {
+            phys = start_idx * PAGESIZE;
+            break;
+        }
+    }
+
+    if (phys != 0) {
+        for (size_t i = start_idx; i < start_idx + count; ++i) {
+            SETBIT(bitmap, i);
+        }
+    }
+
+    return phys;
+}
+
+uintptr_t
+mm_pmem_alloc(size_t count)
+{
+    uintptr_t phys;
+
+    spinlock_acquire(&bitmap_lock, true);
+    phys = pmem_alloc(count);
+    if (phys == 0) {
+        last_bit = 0;
+        phys = pmem_alloc(count);
+    }
+
+    spinlock_release(&bitmap_lock);
+    return phys;
+}
+
+void
+mm_pmem_free(uintptr_t base, size_t count)
+{
+    uintptr_t range_end;
+
+    spinlock_acquire(&bitmap_lock, true);
+    range_end = base + (count * PAGESIZE);
+    bitmap_set_range(base, range_end, false);
+    spinlock_release(&bitmap_lock);
+}
+
 void
 mm_pmem_init(void)
 {
     dtrace("probing physical memory...\n");
     pmem_probe();
+
+    dtrace("allocating bitmap...\n");
+    pmem_alloc_bitmap();
 }
