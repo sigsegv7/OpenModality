@@ -30,6 +30,13 @@
 #include <core/bpt.h>
 #include <boot/limine.h>
 
+/* Memory map */
+static struct limine_memmap_response *memmap_resp;
+static volatile struct limine_memmap_request memmap_req = {
+    .id = LIMINE_MEMMAP_REQUEST,
+    .revision = 0
+};
+
 /* Higher half direct map */
 static struct limine_hhdm_response *hhdm_resp;
 static volatile struct limine_hhdm_request hhdm_req = {
@@ -52,6 +59,22 @@ limine_get_vars(struct bpt_vars *vars)
     return 0;
 }
 
+static int
+limine_get_mementry(size_t index, struct bpt_mementry *res)
+{
+    struct limine_memmap_entry *entry;
+
+    if (res == NULL || index >= memmap_resp->entry_count) {
+        return -1;
+    }
+
+    entry = memmap_resp->entries[index];
+    res->base = entry->base;
+    res->length = entry->length;
+    res->type = entry->type;    /* 1:1 */
+    return 0;
+}
+
 int
 bpt_init_limine(struct bpt_hooks *hooks)
 {
@@ -61,8 +84,10 @@ bpt_init_limine(struct bpt_hooks *hooks)
 
     /* Load responses */
     hhdm_resp = hhdm_req.response;
+    memmap_resp = memmap_req.response;
 
     /* Set hooks */
     hooks->get_vars = limine_get_vars;
+    hooks->get_mementry = limine_get_mementry;
     return 0;
 }

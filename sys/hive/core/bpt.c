@@ -55,6 +55,16 @@ bpt_get_vars(struct bpt_vars *res)
 }
 
 int
+bpt_get_mementry(size_t index, struct bpt_mementry *res)
+{
+    if (hooks.get_mementry == NULL) {
+        return -1;
+    }
+
+    return hooks.get_mementry(index, res);
+}
+
+int
 bpt_init(void)
 {
     /*

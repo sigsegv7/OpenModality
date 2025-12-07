@@ -42,6 +42,21 @@
 #define BPT_SIG_LIMINE "limine"
 
 /*
+ * Represents valid memory map entry
+ * types
+ */
+typedef enum {
+    MEM_USABLE,
+    MEM_RESERVED,
+    MEM_ACPI_RECLAIM,
+    MEM_ACPI_NVS,
+    MEM_BAD,
+    MEM_BOOTLOADER,
+    MEM_KERNEL,
+    MEM_FRAMEBUFFER
+} mem_type_t;
+
+/*
  * Represents static variables provided by the
  * boot protocol currently in-use.
  *
@@ -52,11 +67,25 @@ struct bpt_vars {
 };
 
 /*
+ * Represents a memory map entry
+ *
+ * @base: Base of memory area
+ * @length: Length of memory area
+ * @type: Memory area type
+ */
+struct bpt_mementry {
+    uintptr_t base;
+    size_t length;
+    mem_type_t type;
+};
+
+/*
  * Represents boot protocol translation hooks that
  * interface with the underlying boot protocol.
  */
 struct bpt_hooks {
     int(*get_vars)(struct bpt_vars *res);
+    int(*get_mementry)(size_t index, struct bpt_mementry *res);
 };
 
 /*
@@ -67,6 +96,14 @@ struct bpt_hooks {
  * Returns zero on success
  */
 int bpt_get_vars(struct bpt_vars *res);
+
+/*
+ * Acquire a memory map entry by index
+ *
+ * Returns zero on success, non-zero values indicate end
+ * of memory entry list or error.
+ */
+int bpt_get_mementry(size_t index, struct bpt_mementry *res);
 
 /*
  * Initialize the boot protocol translation layer
