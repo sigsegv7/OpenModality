@@ -27,20 +27,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <core/bpt.h>
-#include <core/trace.h>
-#include <mm/pmem.h>
+#ifndef _MM_PSEG_H_
+#define _MM_PSEG_H_ 1
 
-void kmain(void);
+/*
+ * Initialize the physical memory manager
+ */
+void mm_pmem_init(void);
 
-void
-kmain(void)
-{
-    /* Initialize boot protocol translation */
-    if (bpt_init() != 0) {
-        return;
-    }
-
-    printf("hive: engaging pmem...\n");
-    mm_pmem_init();
-}
+#endif  /* !_MM_PSEG_H_ */

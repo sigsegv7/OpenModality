@@ -35,6 +35,7 @@ LD =
 
 CFILES = $(shell find . -name "*.c")
 CFILES += $(shell find ../bpt -name "*.c")
+CFILES += $(shell find ../mm -name "*.c")
 OFILES = $(CFILES:.c=.o)
 CFLAGS = -I../inc/ -I../../../sdk/inc/ $(SYS_CFLAGS) -D__BOOT_PROTO="\"$(BOOT_PROTO)\""
 
