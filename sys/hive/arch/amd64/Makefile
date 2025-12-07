@@ -27,31 +27,18 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-CC = @CC@
-LD = @LD@
-ARCH = @ARCH@
-ISO = oxide.iso
-SYS_CFLAGS = @SYS_CFLAGS@
-OMAR = $(shell pwd)/tools/omar/bin/omar
-SYSROOT = root
+SYS_CFLAGS =
+CC =
+LD =
+
+HIVE_OUT = ../../hive.sys
+ASMFILES = $(shell find . -name "*.S")
+ASMOBJECT = $(ASMFILES:.S=.S.o)
+MISC_OBJECT = $(shell find ../../ -name "*.o")
 
 .PHONY: all
-all: $(SYSROOT) sdk hive iso
+all: $(ASMOBJECT)
+	$(LD) -Tconf/link.ld $(MISC_OBJECT) -o $(HIVE_OUT)
 
-.PHONY: hive
-hive:
-	cd sys/hive/; make ARCH=$(ARCH) CC=$(CC) LD=$(LD) SYS_CFLAGS="$(SYS_CFLAGS)"
-
-.PHONY: iso
-iso:
-	bash tools/iso-limine.sh
-
-.PHONY: $(SYSROOT)
-$(SYSROOT):
-	mkdir -p $(SYSROOT)/
-	mkdir -p $(SYSROOT)/boot/
-	mkdir -p $(SYSROOT)/usr/include/
-
-.PHONY: sdk
-sdk:
-	cd sdk/; make ARCH=$(ARCH) CC=$(CC) SYS_CFLAGS="$(SYS_CFLAGS)"
+%.S.o: %.S
+	$(CC) -c $(SYS_CFLAGS) $< -o $@
