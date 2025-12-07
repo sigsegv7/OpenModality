@@ -41,4 +41,7 @@ int strcmp(const char *s1, const char *s2);
 /* Copy n bytes of 'src' to 'dest' */
 void *memcpy(void *dest, const void *src, size_t n);
 
+/* Convert an integer to string */
+char *itoa(int64_t value, char *buf, int base);
+
 #endif  /* !_LIB_STRING_H_ */
