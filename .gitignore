@@ -8,3 +8,6 @@
 /root
 /cc
 /Makefile
+/sys/boot
+/var/autom4te.cache
+/var/configure
