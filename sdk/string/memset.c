@@ -27,31 +27,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _LIB_STRING_H_
-#define _LIB_STRING_H_ 1
+#include <lib/string.h>
 
-#include <sys/types.h>
-#include <lib/stdarg.h>
+void *
+memset(void *s, int c, size_t n)
+{
+    for (size_t i = 0; i < n; ++i) {
+        ((char *)s)[i] = c;
+    }
 
-/* Get the length of a string */
-size_t strlen(const char *s);
-
-/* Compare two strings */
-int strcmp(const char *s1, const char *s2);
-
-/* Copy n bytes of 'src' to 'dest' */
-void *memcpy(void *dest, const void *src, size_t n);
-
-/* Set 'n' bytes of 's' with 'c' */
-void *memset(void *s, int c, size_t n);
-
-/* Convert an integer to string */
-char *itoa(int64_t value, char *buf, int base);
-
-/* Format string with va_list */
-int vsnprintf(char *s, size_t size, const char *fmt, va_list ap);
-
-/* Format string */
-int snprintf(char *s, size_t size, const char *fmt, ...);
-
-#endif  /* !_LIB_STRING_H_ */
+    return s;
+}
