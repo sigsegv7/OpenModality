@@ -4,6 +4,7 @@
 *.a
 *.log
 *.bin
+*.sys
 *.status
 /root
 /cc
