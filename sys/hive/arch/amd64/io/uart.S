@@ -27,15 +27,68 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-    .text
-    .globl _start
-    .extern kmain
-    .extern mu_uart_init
-_start:
-    cli
-    cld
+    .set UART_COM1, 0x3F8
+    .macro bus_outb port, val
+        mov $\port, %rdi
+        mov $\val, %rsi
+        call __bus_outb
+    .endm
 
-    call mu_uart_init
-    call kmain
-1:  hlt
-    jmp 1b
+    .text
+    .globl mu_uart_init
+mu_uart_init:
+    push %r12
+    push %r13
+    push %r14
+    push %r15
+    push %rbx
+    push %rbp
+
+    bus_outb UART_COM1+1, 0x00      /* Disable interrupts */
+    bus_outb UART_COM1+3, 1<<7      /* Set DLAB */
+    bus_outb UART_COM1+0, 0x02      /* 57600 buad */
+    bus_outb UART_COM1+1, 0x00      /* High bits */
+    bus_outb UART_COM1+3, 0x03      /* Line control [data+stop,no parity] */
+    bus_outb UART_COM1+2, 0x00      /* Set FIFO, 14-byte threshold */
+    bus_outb UART_COM1+4, 0x0B      /* DTR+RTS */
+
+    pop %rbp
+    pop %rbx
+    pop %r15
+    pop %r14
+    pop %r13
+    pop %r12
+    retq
+
+    .globl mu_uart_write
+mu_uart_write:
+    /*
+     * void mu_uart_write(const char *str, size_t len);
+     */
+    push %r12
+    push %r13
+    push %r14
+    push %r15
+    push %rbx
+    push %rbp
+
+    mov %rsi, %rcx              /* STR */
+    mov %rdi, %rsi              /* LEN */
+1:  lodsb                       /* *STR++ -> EAX */
+    mov $UART_COM1, %dx         /* COM1 */
+    outb %al, %dx               /* Write out the byte */
+    loop 1b                     /* Loop back */
+
+    pop %rbp
+    pop %rbx
+    pop %r15
+    pop %r14
+    pop %r13
+    pop %r12
+    retq
+
+__bus_outb:
+    mov %rdi, %rdx
+    mov %rsi, %rax
+    outb %al, %dx
+    retq

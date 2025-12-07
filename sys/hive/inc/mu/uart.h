@@ -27,15 +27,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-    .text
-    .globl _start
-    .extern kmain
-    .extern mu_uart_init
-_start:
-    cli
-    cld
+/*
+ * Description: UART machine unifier
+ * Author: Ian Moffett
+ */
 
-    call mu_uart_init
-    call kmain
-1:  hlt
-    jmp 1b
+#ifndef _MU_UART_H_
+#define _MU_UART_H_ 1
+
+/*
+ * Initialize the platform UART chip.
+ */
+void mu_uart_init(void);
+
+/*
+ * Write bytes to the platform UART chip
+ */
+void mu_uart_write(const char *s, size_t len);
+
+#endif  /* _MU_UART_H_ */
