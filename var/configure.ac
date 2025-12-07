@@ -31,10 +31,8 @@ AC_INIT([OpenModality], [0.0.1], [ian@osmora.org])
 AC_PROG_CC
 
 SDKROOT=$(pwd)/sdk/
-CC=clang
-LD=ld
-#CC=$(pwd)/cc/gcc/bin/x86_64-pc-osmora-gcc
-#LD=$(pwd)/cc/toolchain/build-binutils/bin/x86_64-pc-osmora-ld
+CC=$(pwd)/cc/gcc/bin/x86_64-pc-osmora-gcc
+LD=$(pwd)/cc/toolchain/build-binutils/bin/x86_64-pc-osmora-ld
 ARCH="amd64"
 
 MD_CFLAGS="-mno-sse -mno-sse2 -mno-sse3 -mno-mmx -mno-3dnow -mno-avx -mno-avx2 -mno-80387"
