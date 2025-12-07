@@ -27,6 +27,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+SDKROOT =
 SYS_CFLAGS =
 CC =
 LD =
@@ -35,10 +36,11 @@ HIVE_OUT = ../../hive.sys
 ASMFILES = $(shell find . -name "*.S")
 ASMOBJECT = $(ASMFILES:.S=.S.o)
 MISC_OBJECT = $(shell find ../../ -name "*.o")
+LDFLAGS = -L$(SDKROOT) -lmodal
 
 .PHONY: all
 all: $(ASMOBJECT)
-	$(LD) -Tconf/link.ld $(MISC_OBJECT) -o $(HIVE_OUT)
+	$(LD) -Tconf/link.ld $(MISC_OBJECT) $(LDFLAGS) -o $(HIVE_OUT)
 
 %.S.o: %.S
 	$(CC) -c $(SYS_CFLAGS) $< -o $@

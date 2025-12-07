@@ -27,6 +27,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+SDKROOT =
 SYS_CFLAGS =
 ARCH =
 CC =
@@ -37,4 +38,4 @@ all: arch
 
 .PHONY: arch
 arch:
-	cd arch/$(ARCH); make CC=$(CC) LD=$(LD) SYS_CFLAGS="$(SYS_CFLAGS)"
+	cd arch/$(ARCH); make CC=$(CC) LD=$(LD) SYS_CFLAGS="$(SYS_CFLAGS)" SDKROOT=$(SDKROOT)

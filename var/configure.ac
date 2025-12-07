@@ -30,6 +30,7 @@
 AC_INIT([OpenModality], [0.0.1], [ian@osmora.org])
 AC_PROG_CC
 
+SDKROOT=$(pwd)/sdk/
 CC=clang
 LD=ld
 #CC=$(pwd)/cc/gcc/bin/x86_64-pc-osmora-gcc
@@ -41,6 +42,7 @@ CFLAGS="-Wno-attributes -nostdlib -nostdinc -ffreestanding  -mcmodel=kernel -fno
         --std=gnu11 -fexceptions -D_HIVE $MD_CFLAGS"
 
 AC_SUBST(SYS_CFLAGS, [$CFLAGS])
+AC_SUBST(SDKROOT, [$SDKROOT])
 AC_SUBST(CC, [$CC])
 AC_SUBST(LD, [$LD])
 AC_SUBST(ARCH, [$ARCH])
