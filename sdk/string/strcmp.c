@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2025 Ian Marco Moffett and the OpenModality engineers
  * All rights reserved.
@@ -27,15 +28,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _LIB_STRING_H_
-#define _LIB_STRING_H_ 1
+#include <lib/string.h>
 
-#include <sys/types.h>
+int
+strcmp(const char *s1, const char *s2)
+{
+    while (*s1 == *s2++) {
+        if (*s1++ == 0) {
+            return (0);
+        }
+    }
 
-/* Get the length of a string */
-size_t strlen(const char *s);
-
-/* Compare two strings */
-int strcmp(const char *s1, const char *s2);
-
-#endif  /* !_LIB_STRING_H_ */
+    return (*(uint8_t *)s1 - *(uint8_t *)--s2);
+}
