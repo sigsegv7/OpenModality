@@ -27,6 +27,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+    .set PIC_MASTER_DATA, 0x21
+    .set PIC_SLAVE_DATA,  0xA1
+
     .text
     .globl _start
     .extern kmain
@@ -34,6 +37,14 @@
 _start:
     cli
     cld
+
+    /*
+     * OpenModality relies on APIC operation and therefore
+     * legacy i8259 functionality must be disabled.
+     */
+    mov $0xFF, %al
+    outb %al, $PIC_MASTER_DATA
+    outb %al, $PIC_SLAVE_DATA
 
     call mu_uart_init
     call kmain
