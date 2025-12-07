@@ -29,17 +29,15 @@
 
 SDKROOT =
 SYS_CFLAGS =
-ARCH =
 CC =
 LD =
 
+CFILES = $(shell find . -name "*.c")
+OFILES = $(CFILES:.c=.o)
+CFLAGS = -I../inc/ -I../../../sdk/inc/ $(SYS_CFLAGS)
+
 .PHONY: all
-all: core arch
+all: $(OFILES)
 
-.PHONY: core
-core:
-	cd core/; make CC=$(CC) LD=$(LD) SYS_CFLAGS="$(SYS_CFLAGS)" SDKROOT=$(SDKROOT)
-
-.PHONY: arch
-arch:
-	cd arch/$(ARCH); make CC=$(CC) LD=$(LD) SYS_CFLAGS="$(SYS_CFLAGS)" SDKROOT=$(SDKROOT)
+%.o: %.c
+	$(CC) -c $(CFLAGS) $< -o $@

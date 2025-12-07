@@ -27,12 +27,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-    .globl _start
-    .extern kmain
-_start:
-    cli
-    cld
+void kmain(void);
 
-    call kmain
-1:  hlt
-    jmp 1b
+void
+kmain(void)
+{
+}
