@@ -31,6 +31,7 @@
 #define _LIB_STRING_H_ 1
 
 #include <sys/types.h>
+#include <lib/stdarg.h>
 
 /* Get the length of a string */
 size_t strlen(const char *s);
@@ -43,5 +44,11 @@ void *memcpy(void *dest, const void *src, size_t n);
 
 /* Convert an integer to string */
 char *itoa(int64_t value, char *buf, int base);
+
+/* Format string with va_list */
+int vsnprintf(char *s, size_t size, const char *fmt, va_list ap);
+
+/* Format string */
+int snprintf(char *s, size_t size, const char *fmt, ...);
 
 #endif  /* !_LIB_STRING_H_ */
