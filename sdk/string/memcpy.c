@@ -27,18 +27,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _LIB_STRING_H_
-#define _LIB_STRING_H_ 1
+#include <lib/string.h>
 
-#include <sys/types.h>
+void *
+memcpy(void *dest, const void *src, size_t n)
+{
+    if (dest == NULL || src == NULL) {
+        return NULL;
+    }
 
-/* Get the length of a string */
-size_t strlen(const char *s);
+    for (size_t i = 0; i < n; ++i) {
+        ((char *)dest)[i] = ((char *)src)[i];
+    }
 
-/* Compare two strings */
-int strcmp(const char *s1, const char *s2);
-
-/* Copy n bytes of 'src' to 'dest' */
-void *memcpy(void *dest, const void *src, size_t n);
-
-#endif  /* !_LIB_STRING_H_ */
+    return dest;
+}
