@@ -26,33 +26,87 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-    .set PIC_MASTER_DATA, 0x21
-    .set PIC_SLAVE_DATA,  0xA1
-
     .text
-    .globl _start
-    .extern kmain
-    .extern mu_uart_init
-    .extern md_gdt_load
-    .extern g_GDTR
-_start:
-    cli
-    cld
-
+    .globl md_gdt_load
+md_gdt_load:
     /*
-     * OpenModality relies on APIC operation and therefore
-     * legacy i8259 functionality must be disabled.
+     * Load a GDTR into the current core
+     *
+     * [RDI]: Base address of GDTR
      */
-    mov $0xFF, %al
-    outb %al, $PIC_MASTER_DATA
-    outb %al, $PIC_SLAVE_DATA
+    push %r12
+    push %r13
+    push %r14
+    push %r15
+    push %rbx
+    push %rbp
 
-    /* Load our own GDT */
-    lea g_GDTR(%rip), %rdi
-    call md_gdt_load
+    lgdt (%rdi)             /* Load the GDT */
+    lea 1f(%rip), %rbx      /* Drop point -> RBX */
+    push $0x08              /* CS */
+    push %rbx               /* Drop point */
+    lretq                   /* Flush prefetch + reload CS */
 
-    call mu_uart_init
-    call kmain
-1:  hlt
-    jmp 1b
+1:  mov $0x10, %ax          /* DS */
+    mov %ax, %ds
+    mov %ax, %es
+    mov %ax, %fs
+    mov %ax, %ax
+    mov %ax, %ss
+    xor %ax, %ax
+    mov %ax, %gs
+
+    pop %rbp
+    pop %rbx
+    pop %r15
+    pop %r14
+    pop %r13
+    pop %r12
+    retq
+
+     .section .data
+    .globl g_GDT
+g_GDT:
+.NULL:
+    .word 0x0000
+    .word 0x0000
+    .byte 0x00
+    .byte 0b00000000
+    .byte 0b00000000
+    .byte 0x00
+.CODE:
+    .word 0x0000
+    .word 0x0000
+    .byte 0x00
+    .byte 0b10011010
+    .byte 0b00100000
+    .byte 0x00
+.DATA:
+    .word 0x0000
+    .word 0x0000
+    .byte 0x00
+    .byte 0b10010010
+    .byte 0b00000000
+    .byte 0x00
+.UCODE:
+    .word 0x0000
+    .word 0x0000
+    .byte 0x00
+    .byte 0b11111010
+    .byte 0b10101111
+    .byte 0x00
+.UDATA:
+    .word 0x0000
+    .word 0x0000
+    .byte 0x00
+    .byte 0b11110010
+    .byte 0b00000000
+    .byte 0x00
+.TSS:
+    .quad 0x00
+    .quad 0x00
+
+    .globl g_GDTR
+g_GDTR:
+    .word g_GDTR - g_GDT
+    .quad g_GDT
