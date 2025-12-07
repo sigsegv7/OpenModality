@@ -35,6 +35,7 @@
 #ifndef _CORE_BPT_H_
 #define _CORE_BPT_H_ 1
 
+#include <sys/cdefs.h>
 #include <sys/types.h>
 
 /* Boot protocol signatures */
@@ -76,5 +77,22 @@ int bpt_init(void);
  * Protocol specific init routines
  */
 int bpt_init_limine(struct bpt_hooks *hooks);
+
+/*
+ * Shorthand to acquire the kernel load base, used in
+ * macros for converting higher half to lower half and
+ * vice versa.
+ */
+ALWAYS_INLINE static inline uintptr_t
+bpt_kernel_base(void)
+{
+    struct bpt_vars vars;
+
+    if (bpt_get_vars(&vars) != 0) {
+        return 0;
+    }
+
+    return vars.kernel_base;
+}
 
 #endif  /* !_CORE_BPT_H_ */
