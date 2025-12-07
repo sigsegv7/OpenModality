@@ -27,14 +27,16 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+BOOT_PROTO =
 SDKROOT =
 SYS_CFLAGS =
 CC =
 LD =
 
 CFILES = $(shell find . -name "*.c")
+CFILES += $(shell find ../bpt -name "*.c")
 OFILES = $(CFILES:.c=.o)
-CFLAGS = -I../inc/ -I../../../sdk/inc/ $(SYS_CFLAGS)
+CFLAGS = -I../inc/ -I../../../sdk/inc/ $(SYS_CFLAGS) -D__BOOT_PROTO="\"$(BOOT_PROTO)\""
 
 .PHONY: all
 all: $(OFILES)

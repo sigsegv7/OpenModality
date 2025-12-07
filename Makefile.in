@@ -31,6 +31,7 @@ CC = @CC@
 LD = @LD@
 ARCH = @ARCH@
 SDKROOT = @SDKROOT@
+BOOT_PROTO = @BOOT_PROTO@
 ISO = oxide.iso
 SYS_CFLAGS = @SYS_CFLAGS@
 OMAR = $(shell pwd)/tools/omar/bin/omar
@@ -41,7 +42,8 @@ all: $(SYSROOT) sdk hive iso
 
 .PHONY: hive
 hive:
-	cd sys/hive/; make ARCH=$(ARCH) CC=$(CC) LD=$(LD) SYS_CFLAGS="$(SYS_CFLAGS)" SDKROOT=$(SDKROOT)
+	cd sys/hive/; make ARCH=$(ARCH) CC=$(CC) LD=$(LD) SYS_CFLAGS="$(SYS_CFLAGS)" \
+		SDKROOT=$(SDKROOT) BOOT_PROTO="$(BOOT_PROTO)"
 
 .PHONY: iso
 iso:

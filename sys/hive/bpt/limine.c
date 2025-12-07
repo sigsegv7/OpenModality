@@ -28,14 +28,41 @@
  */
 
 #include <core/bpt.h>
+#include <boot/limine.h>
 
-void kmain(void);
+/* Higher half direct map */
+static struct limine_hhdm_response *hhdm_resp;
+static volatile struct limine_hhdm_request hhdm_req = {
+    .id = LIMINE_HHDM_REQUEST,
+    .revision = 0
+};
 
-void
-kmain(void)
+/*
+ * Acquire static / unchanging variables from the
+ * bootloader
+ */
+static int
+limine_get_vars(struct bpt_vars *vars)
 {
-    /* Initialize boot protocol translation */
-    if (bpt_init() != 0) {
-        return;
+    if (vars == NULL) {
+        return -1;
     }
+
+    vars->kernel_base = hhdm_resp->offset;
+    return 0;
+}
+
+int
+bpt_init_limine(struct bpt_hooks *hooks)
+{
+    if (hooks == NULL) {
+        return -1;
+    }
+
+    /* Load responses */
+    hhdm_resp = hhdm_req.response;
+
+    /* Set hooks */
+    hooks->get_vars = limine_get_vars;
+    return 0;
 }

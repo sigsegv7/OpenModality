@@ -27,15 +27,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*
+ * Description: Boot protocol translation layer
+ * Author: Ian Moffett
+ */
+
+#include <sys/types.h>
 #include <core/bpt.h>
+#include <lib/string.h>
 
-void kmain(void);
+#if defined(__BOOT_PROTO)
+#define BOOT_PROTO __BOOT_PROTO
+#else
+#error "BOOT PROTOCOL NOT DEFINED"
+#endif  /* __BOOT_PROTO */
 
-void
-kmain(void)
+static struct bpt_hooks hooks;
+
+int
+bpt_get_vars(struct bpt_vars *res)
 {
-    /* Initialize boot protocol translation */
-    if (bpt_init() != 0) {
-        return;
+    if (hooks.get_vars == NULL) {
+        return -1;
     }
+
+    return hooks.get_vars(res);
+}
+
+int
+bpt_init(void)
+{
+    /*
+     * Initialize the hooks for the currently in-use
+     * boot protocol
+     */
+    switch (*BOOT_PROTO) {
+    case 'l':
+        if (strcmp(BOOT_PROTO, BPT_SIG_LIMINE) == 0) {
+            return bpt_init_limine(&hooks);
+        }
+        break;
+    }
+
+    return -1;
 }

@@ -27,15 +27,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <core/bpt.h>
+/*
+ * Description: Boot protocol translation layer
+ * Author: Ian Moffett
+ */
 
-void kmain(void);
+#ifndef _CORE_BPT_H_
+#define _CORE_BPT_H_ 1
 
-void
-kmain(void)
-{
-    /* Initialize boot protocol translation */
-    if (bpt_init() != 0) {
-        return;
-    }
-}
+#include <sys/types.h>
+
+/* Boot protocol signatures */
+#define BPT_SIG_LIMINE "limine"
+
+/*
+ * Represents static variables provided by the
+ * boot protocol currently in-use.
+ *
+ * @kernel_base: Virtual kernel load base
+ */
+struct bpt_vars {
+    uintptr_t kernel_base;
+};
+
+/*
+ * Represents boot protocol translation hooks that
+ * interface with the underlying boot protocol.
+ */
+struct bpt_hooks {
+    int(*get_vars)(struct bpt_vars *res);
+};
+
+/*
+ * Acquire static boot protocol variables
+ *
+ * @res: Result is written here
+ *
+ * Returns zero on success
+ */
+int bpt_get_vars(struct bpt_vars *res);
+
+/*
+ * Initialize the boot protocol translation layer
+ */
+int bpt_init(void);
+
+/*
+ * Protocol specific init routines
+ */
+int bpt_init_limine(struct bpt_hooks *hooks);
+
+#endif  /* !_CORE_BPT_H_ */

@@ -27,6 +27,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+BOOT_PROTO =
 SDKROOT =
 SYS_CFLAGS =
 ARCH =
@@ -38,7 +39,8 @@ all: core arch
 
 .PHONY: core
 core:
-	cd core/; make CC=$(CC) LD=$(LD) SYS_CFLAGS="$(SYS_CFLAGS)" SDKROOT=$(SDKROOT)
+	cd core/; make CC=$(CC) LD=$(LD) SYS_CFLAGS="$(SYS_CFLAGS)" \
+		BOOT_PROTO=$(BOOT_PROTO) SDKROOT=$(SDKROOT)
 
 .PHONY: arch
 arch:

@@ -30,7 +30,9 @@
 AC_INIT([OpenModality], [0.0.1], [ian@osmora.org])
 AC_PROG_CC
 
+BOOT_PROTO="limine"
 SDKROOT=$(pwd)/sdk/
+
 CC=$(pwd)/cc/gcc/bin/x86_64-pc-osmora-gcc
 LD=$(pwd)/cc/toolchain/build-binutils/bin/x86_64-pc-osmora-ld
 ARCH="amd64"
@@ -41,6 +43,7 @@ CFLAGS="-Wno-attributes -nostdlib -nostdinc -ffreestanding  -mcmodel=kernel -fno
 
 AC_SUBST(SYS_CFLAGS, [$CFLAGS])
 AC_SUBST(SDKROOT, [$SDKROOT])
+AC_SUBST(BOOT_PROTO, [$BOOT_PROTO])
 AC_SUBST(CC, [$CC])
 AC_SUBST(LD, [$LD])
 AC_SUBST(ARCH, [$ARCH])
