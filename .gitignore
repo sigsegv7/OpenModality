@@ -1,6 +1,10 @@
 *.iso
 *.d
 *.o
+*.a
 *.log
 *.bin
 *.status
+/root
+/cc
+/Makefile
