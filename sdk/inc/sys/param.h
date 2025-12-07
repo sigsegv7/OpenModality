@@ -34,4 +34,18 @@
 #define PTR_OFFSET(P, OFF) (void *)((uintptr_t)(P) + (OFF))
 #define PTR_NOFFSET(P, OFF) (void *)((uintptr_t)(P) - (OFF))
 
+/* Bit related macros */
+#define ISSET(v, f)  ((v) & (f))
+#define BIT(n) (1ULL << (n))
+#define MASK(n) ((1ULL << n) - 1)
+
+/* Align up/down a value */
+#define ALIGN_DOWN(value, align)      ((value) & ~((align)-1))
+#define ALIGN_UP(value, align)        (((value) + (align)-1) & ~((align)-1))
+
+/* Bitmap helper macros */
+#define SETBIT(a, b) ((a)[(b) >> 3] |= BIT(b % 8))
+#define CLRBIT(a, b) ((a)[(b) >> 3] &= ~BIT(b % 8))
+#define TESTBIT(a, b) (ISSET((a)[(b) >> 3], BIT(b % 8)))
+
 #endif  /* !_SYS_PARAM_H_ */
