@@ -6,6 +6,7 @@
 *.bin
 *.sys
 *.status
+/gen/bin
 /root
 /cc
 /Makefile
