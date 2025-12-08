@@ -40,7 +40,7 @@
 
 #define MEMAR_MAGIC "LORD"
 #define MEMAR_MAGIC_LEN 4
-#define FILE_NAME_MAX 32
+#define FILE_NAME_MAX 99
 
 /* Align a value up to a nearest multiple */
 #define ALIGN_UP(value, align) (((value) + (align)-1) & ~((align)-1))
@@ -72,7 +72,7 @@ static char file_pad[FILE_ALIGN] = {0};
 struct __attribute__((packed)) file_hdr {
     char magic[MEMAR_MAGIC_LEN];
     size_t hdr_size;
-    char name[NAME_MAX];
+    char name[FILE_NAME_MAX];
 };
 
 static void
@@ -102,8 +102,8 @@ file_hdr_init(const char *name, struct file_hdr *hdr)
 
     /* Truncate name if needed */
     name_len = strlen(name);
-    if (name_len >= NAME_MAX - 1) {
-        name_len = NAME_MAX - 1;
+    if (name_len >= FILE_NAME_MAX - 1) {
+        name_len = FILE_NAME_MAX - 1;
     }
 
     memcpy(hdr->name, name, name_len);
