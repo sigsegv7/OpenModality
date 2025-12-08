@@ -29,7 +29,10 @@
 
 #include <core/bpt.h>
 #include <core/trace.h>
+#include <mu/cpu.h>
 #include <mm/pmem.h>
+
+static struct pcr bsp;
 
 void kmain(void);
 
@@ -43,4 +46,7 @@ kmain(void)
 
     printf("hive: engaging pmem...\n");
     mm_pmem_init();
+
+    printf("hive: configuring bsp...\n");
+    mu_cpu_conf(&bsp);
 }

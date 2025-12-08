@@ -35,12 +35,20 @@ LD =
 HIVE_OUT = ../../hive.sys
 ASMFILES = $(shell find . -name "*.S")
 ASMOBJECT = $(ASMFILES:.S=.S.o)
+CFILES = $(shell find . -name "*.c")
+COBJ = $(CFILES:.c=.o)
 MISC_OBJECT = $(shell find ../../ -name "*.o")
+
 LDFLAGS = -L$(SDKROOT) -lmodal
+CFLAGS = -I../../inc/ -I../../target/inc/ \
+		 -I../../../../sdk/inc/ $(SYS_CFLAGS)
 
 .PHONY: all
-all: $(ASMOBJECT)
+all: $(ASMOBJECT) $(COBJ)
 	$(LD) -Tconf/link.ld $(MISC_OBJECT) $(LDFLAGS) -o $(HIVE_OUT)
 
 %.S.o: %.S
 	$(CC) -c $(SYS_CFLAGS) $< -o $@
+
+%.o: %.c
+	$(CC) -c $(CFLAGS) $< -o $@

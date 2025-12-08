@@ -27,47 +27,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _MU_CPU_H_
-#define _MU_CPU_H_ 1
+#include <sys/types.h>
+#include <core/trace.h>
+#include <mu/cpu.h>
+#include <md/msr.h>
 
-#include <lib/stdbool.h>
+void
+mu_cpu_conf(struct pcr *pcr)
+{
+    if (pcr == NULL) {
+        return;
+    }
 
-/*
- * Processor control region
- *
- * @id: Logical ID (assigned by us)
- */
-struct pcr {
-    uint16_t id;
-};
-
-/*
- * Configure the current processor
- *
- * @pcr: Processor control region
- */
-void mu_cpu_conf(struct pcr *pcr);
-
-/*
- * Returns true if interrupts are unmasked
- * and ready to be recieved
- */
-bool mu_cpu_irqtest(void);
-
-/*
- * Set the IRQ mask state
- */
-void mu_cpu_irqset(bool mask);
-
-/*
- * Put the processor in a temporaily halted state
- * until the next interrupt
- */
-void mu_cpu_halt(void);
-
-/*
- * Spinwait hint to the processor
- */
-void mu_cpu_spinwait(void);
-
-#endif  /* !_MU_CPU_H_ */
+    md_wrmsr(IA32_GS_BASE, (uintptr_t)pcr);
+    printf("cpu: processing element %d active\n", pcr->id);
+}
