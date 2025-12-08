@@ -35,12 +35,18 @@ CC =
 LD =
 
 .PHONY: all
-all: core arch
+all: target core arch
+	rm -rf target/
 
 .PHONY: core
 core:
 	cd core/; make CC=$(CC) LD=$(LD) SYS_CFLAGS="$(SYS_CFLAGS)" \
 		BOOT_PROTO=$(BOOT_PROTO) SDKROOT=$(SDKROOT)
+
+.PHONY: target
+target:
+	mkdir -p target/inc/md
+	rsync -avr inc/arch/$(ARCH)/* target/inc/md/
 
 .PHONY: arch
 arch:
