@@ -109,7 +109,7 @@ file_hdr_init(const char *name, struct file_hdr *hdr)
     memcpy(hdr->name, name, name_len);
     memcpy(hdr->magic, MEMAR_MAGIC, MEMAR_MAGIC_LEN);
     hdr->hdr_size = name_len;
-    hdr->hdr_size += sizeof(hdr->hdr_size);
+    hdr->hdr_size += sizeof(struct file_hdr) - FILE_NAME_MAX;
     return hdr->hdr_size;
 }
 
