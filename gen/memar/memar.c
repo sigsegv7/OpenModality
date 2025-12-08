@@ -38,6 +38,8 @@
 #include <string.h>
 #include <fcntl.h>
 
+#define MEMAR_MAGIC "LORD"
+#define MEMAR_MAGIC_LEN 4
 #define FILE_NAME_MAX 32
 
 /* Align a value up to a nearest multiple */
@@ -68,6 +70,7 @@ static char file_pad[FILE_ALIGN] = {0};
  * ...
  */
 struct __attribute__((packed)) file_hdr {
+    char magic[MEMAR_MAGIC_LEN];
     size_t hdr_size;
     char name[NAME_MAX];
 };
@@ -104,6 +107,7 @@ file_hdr_init(const char *name, struct file_hdr *hdr)
     }
 
     memcpy(hdr->name, name, name_len);
+    memcpy(hdr->magic, MEMAR_MAGIC, MEMAR_MAGIC_LEN);
     hdr->hdr_size = name_len;
     hdr->hdr_size += sizeof(hdr->hdr_size);
     return hdr->hdr_size;
