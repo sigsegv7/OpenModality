@@ -36,6 +36,31 @@
 static bool is_init = false;
 static struct knode *root_dir;
 
+int
+ob_root_foreach(ktype_t type, int(*cb)(struct knode *kn))
+{
+    struct knode_dir *dir;
+    struct knode *knp;
+    int retval = 0;
+
+    if (root_dir == NULL || cb == NULL) {
+        return -1;
+    }
+
+    dir = KNODE_DIR(root_dir);
+    TAILQ_FOREACH(knp, &dir->list, dir_link) {
+        if (knp->type != type) {
+            continue;
+        }
+
+        if ((retval = cb(knp)) >= 0) {
+            break;
+        }
+    }
+
+    return retval;
+}
+
 void
 ob_store_init(void)
 {

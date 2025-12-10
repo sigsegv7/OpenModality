@@ -33,6 +33,8 @@
 #include <sys/types.h>
 #include <ob/knode.h>
 
+#define KNODE_DIR(KNODE_P) ((KNODE_P)->data)
+
 /*
  * Represents a knode directory
  *
@@ -63,6 +65,17 @@ int ob_dir_new(const char *name, struct knode **res);
  * Returns zero on success
  */
 int ob_dir_append(struct knode *knp, struct knode *dir_kn);
+
+/*
+ * Lookup a node within the root directory
+ *
+ * @type: Knode type to lookup
+ * @cb: Callback invoked every time 'type' is encountered
+ *
+ * XXX: 'cb' returns a less than zero value to continue the iteration
+ *      and a >= 0 value to terminate it
+ */
+int ob_root_foreach(ktype_t type, int(*cb)(struct knode *kn));
 
 /*
  * Initialize the knode object store
