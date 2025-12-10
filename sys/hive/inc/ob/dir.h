@@ -55,6 +55,16 @@ struct knode_dir {
 int ob_dir_new(const char *name, struct knode **res);
 
 /*
+ * Append a knode to a directory knode
+ *
+ * @knp: Knode to append
+ * @dir_kn: Target directory knode
+ *
+ * Returns zero on success
+ */
+int ob_dir_append(struct knode *knp, struct knode *dir_kn);
+
+/*
  * Initialize the knode object store
  */
 void ob_store_init(void);

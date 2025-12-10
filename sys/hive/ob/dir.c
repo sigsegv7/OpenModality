@@ -63,3 +63,26 @@ ob_dir_new(const char *name, struct knode **res)
     *res = knp;
     return 0;
 }
+
+int
+ob_dir_append(struct knode *knp, struct knode *dir_kn)
+{
+    struct knode_dir *dir;
+
+    if (knp == NULL || dir_kn == NULL) {
+        return -EINVAL;
+    }
+
+    /* This must be a directory */
+    if (knp->type != K_DIR) {
+        return -ENOTSUP;
+    }
+
+    if ((dir = dir_kn->data) == NULL) {
+        return -EIO;
+    }
+
+    TAILQ_INSERT_TAIL(&dir->list, knp, dir_link);
+    ++dir->entry_count;
+    return 0;
+}
