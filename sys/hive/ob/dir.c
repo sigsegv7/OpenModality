@@ -27,35 +27,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <core/bpt.h>
-#include <core/trace.h>
-#include <core/panic.h>
+#include <sys/errno.h>
+#include <sys/types.h>
+#include <sys/queue.h>
+#include <sys/errno.h>
 #include <os/pool.h>
 #include <ob/dir.h>
-#include <mu/cpu.h>
-#include <mm/pmem.h>
 
-static struct pcr bsp;
-
-void kmain(void);
-
-void
-kmain(void)
+int
+ob_dir_new(const char *name, struct knode **res)
 {
-    /* Initialize boot protocol translation */
-    if (bpt_init() != 0) {
-        return;
+    struct knode_dir *dirp;
+    struct knode *knp;
+    int error;
+
+    if (name == NULL || res == NULL) {
+        return -EINVAL;
     }
 
-    printf("hive: engaging pmem...\n");
-    mm_pmem_init();
+    error = ob_knode_new(name, K_DIR, &knp);
+    if (error != 0) {
+        return error;
+    }
 
-    printf("hive: engaging root pool...\n");
-    os_pool_init();
+    /* Allocate the data portion */
+    knp->data = os_pool_allocate(sizeof(struct knode_dir));
+    if (knp->data == NULL) {
+        os_pool_free(knp);
+        return -ENOMEM;
+    }
 
-    printf("hive: configuring bsp...\n");
-    mu_cpu_conf(&bsp);
-
-    printf("hive: engaging object store...\n");
-    ob_store_init();
+    dirp = knp->data;
+    TAILQ_INIT(&dirp->list);
+    dirp->entry_count = 0;
+    *res = knp;
+    return 0;
 }

@@ -27,35 +27,56 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <core/bpt.h>
-#include <core/trace.h>
-#include <core/panic.h>
-#include <os/pool.h>
-#include <ob/dir.h>
-#include <mu/cpu.h>
-#include <mm/pmem.h>
+#ifndef _OB_KNODE_H_
+#define _OB_KNODE_H_ 1
 
-static struct pcr bsp;
+#include <sys/queue.h>
+#include <sys/types.h>
 
-void kmain(void);
+/* Maximum length of knode names */
+#define KNODE_NAME_LEN 32
 
-void
-kmain(void)
-{
-    /* Initialize boot protocol translation */
-    if (bpt_init() != 0) {
-        return;
-    }
+/*
+ * Represents valid kernel node types
+ *
+ * @K_NONE:     No assigned type
+ * @K_CLKDEV:   Clock device node
+ */
+typedef enum {
+    K_NONE,
+    K_DIR,
+    K_CLKDEV,
+} ktype_t;
 
-    printf("hive: engaging pmem...\n");
-    mm_pmem_init();
+/*
+ * A kernel node is an abstract representation
+ * of any system object. It is not bound to any
+ * single type and each is backed by its own respective
+ * subsystems.
+ *
+ * @name: Name of kernel node
+ * @type: Type of kernel node
+ * @data: Opaque reference to backing data
+ * @ref:  Reference counter
+ * @dir_link: Directory queue link
+ */
+struct knode {
+    char name[KNODE_NAME_LEN];
+    ktype_t type;
+    void *data;
+    int ref;
+    TAILQ_ENTRY(knode) dir_link;
+};
 
-    printf("hive: engaging root pool...\n");
-    os_pool_init();
+/*
+ * Initialize a new knode
+ *
+ * @name: Name of knode to initialize
+ * @type: Type of knode
+ * @res: Pointer of newly allocated knode written here
+ *
+ * Returns zero on success
+ */
+int ob_knode_new(const char *name, ktype_t type, struct knode **res);
 
-    printf("hive: configuring bsp...\n");
-    mu_cpu_conf(&bsp);
-
-    printf("hive: engaging object store...\n");
-    ob_store_init();
-}
+#endif  /* !_OB_KNODE_H_ */

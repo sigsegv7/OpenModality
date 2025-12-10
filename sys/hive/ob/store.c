@@ -27,35 +27,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <core/bpt.h>
-#include <core/trace.h>
+#include <sys/types.h>
 #include <core/panic.h>
-#include <os/pool.h>
+#include <lib/stdbool.h>
+#include <ob/knode.h>
 #include <ob/dir.h>
-#include <mu/cpu.h>
-#include <mm/pmem.h>
 
-static struct pcr bsp;
-
-void kmain(void);
+static bool is_init = false;
+static struct knode *root_dir;
 
 void
-kmain(void)
+ob_store_init(void)
 {
-    /* Initialize boot protocol translation */
-    if (bpt_init() != 0) {
+    if (is_init) {
         return;
     }
 
-    printf("hive: engaging pmem...\n");
-    mm_pmem_init();
-
-    printf("hive: engaging root pool...\n");
-    os_pool_init();
-
-    printf("hive: configuring bsp...\n");
-    mu_cpu_conf(&bsp);
-
-    printf("hive: engaging object store...\n");
-    ob_store_init();
+    is_init = true;
+    if (ob_dir_new("/", &root_dir) != 0) {
+        panic("ob: could not allocate root directory\n");
+    }
 }

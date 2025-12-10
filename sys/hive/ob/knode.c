@@ -27,35 +27,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <core/bpt.h>
-#include <core/trace.h>
-#include <core/panic.h>
+#include <sys/errno.h>
+#include <ob/knode.h>
 #include <os/pool.h>
-#include <ob/dir.h>
-#include <mu/cpu.h>
-#include <mm/pmem.h>
+#include <lib/string.h>
 
-static struct pcr bsp;
-
-void kmain(void);
-
-void
-kmain(void)
+int
+ob_knode_new(const char *name, ktype_t type, struct knode **res)
 {
-    /* Initialize boot protocol translation */
-    if (bpt_init() != 0) {
-        return;
+    struct knode *knp;
+    size_t name_len;
+
+    if (name == NULL || res == NULL) {
+        return -EINVAL;
     }
 
-    printf("hive: engaging pmem...\n");
-    mm_pmem_init();
+    /* Ensure there is no overflow */
+    name_len = strlen(name);
+    if (name_len >= KNODE_NAME_LEN - 1) {
+        return -ENAMETOOLONG;
+    }
 
-    printf("hive: engaging root pool...\n");
-    os_pool_init();
+    /* Allocate a new node */
+    knp = os_pool_allocate(sizeof(*knp));
+    if (knp == NULL) {
+        return -ENOMEM;
+    }
 
-    printf("hive: configuring bsp...\n");
-    mu_cpu_conf(&bsp);
-
-    printf("hive: engaging object store...\n");
-    ob_store_init();
+    memcpy(knp->name, name, name_len);
+    knp->type = type;
+    knp->ref = 1;
+    *res = knp;
+    return 0;
 }

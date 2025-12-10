@@ -27,35 +27,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <core/bpt.h>
-#include <core/trace.h>
-#include <core/panic.h>
-#include <os/pool.h>
-#include <ob/dir.h>
-#include <mu/cpu.h>
-#include <mm/pmem.h>
+#ifndef _OB_DIR_H_
+#define _OB_DIR_H_ 1
 
-static struct pcr bsp;
+#include <sys/types.h>
+#include <ob/knode.h>
 
-void kmain(void);
+/*
+ * Represents a knode directory
+ *
+ * @list: List of kernel nodes
+ * @entry_count: Number of entries in this directory
+ */
+struct knode_dir {
+    TAILQ_HEAD(, knode) list;
+    size_t entry_count;
+};
 
-void
-kmain(void)
-{
-    /* Initialize boot protocol translation */
-    if (bpt_init() != 0) {
-        return;
-    }
+/*
+ * Create a new knode directory
+ *
+ * @name: Name of directory to create
+ * @res: Result pointer is written here
+ *
+ * Returns zero on success
+ */
+int ob_dir_new(const char *name, struct knode **res);
 
-    printf("hive: engaging pmem...\n");
-    mm_pmem_init();
+/*
+ * Initialize the knode object store
+ */
+void ob_store_init(void);
 
-    printf("hive: engaging root pool...\n");
-    os_pool_init();
-
-    printf("hive: configuring bsp...\n");
-    mu_cpu_conf(&bsp);
-
-    printf("hive: engaging object store...\n");
-    ob_store_init();
-}
+#endif  /* !_OB_DIR_H_ */
