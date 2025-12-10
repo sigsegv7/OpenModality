@@ -59,5 +59,6 @@
 #define	ENOSPC 28	/* No space left on device */
 #define	EROFS 30	/* Read only file system */
 #define ENAMETOOLONG 31
+#define ENOTSUP 32
 
 #endif  /* !_SYS_ERRNO_H_ */
