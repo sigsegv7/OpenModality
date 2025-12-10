@@ -58,5 +58,6 @@
 #define	EFBIG 27	/* File too large */
 #define	ENOSPC 28	/* No space left on device */
 #define	EROFS 30	/* Read only file system */
+#define ENAMETOOLONG 31
 
 #endif  /* !_SYS_ERRNO_H_ */
