@@ -27,31 +27,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <core/bpt.h>
-#include <core/trace.h>
-#include <core/panic.h>
-#include <os/pool.h>
-#include <mu/cpu.h>
-#include <mm/pmem.h>
+#ifndef _OS_POOL_H_
+#define _OS_POOL_H_ 1
 
-static struct pcr bsp;
+#include <sys/types.h>
 
-void kmain(void);
+/*
+ * Initialize the pool management subsystem
+ */
+void os_pool_init(void);
 
-void
-kmain(void)
-{
-    /* Initialize boot protocol translation */
-    if (bpt_init() != 0) {
-        return;
-    }
+/*
+ * Allocate a pool of memory of a specific
+ * length
+ *
+ * @length: Desired length to allocate
+ */
+void *os_pool_allocate(size_t length);
 
-    printf("hive: engaging pmem...\n");
-    mm_pmem_init();
+/*
+ * Free a pool of memory allocated with the
+ * os_pool_allocate() function
+ *
+ * @pool: Pool to free
+ */
+void os_pool_free(void *pool);
 
-    printf("hive: engaging root pool...\n");
-    os_pool_init();
-
-    printf("hive: configuring bsp...\n");
-    mu_cpu_conf(&bsp);
-}
+#endif  /* !_OS_POOL_H_ */

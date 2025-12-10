@@ -27,31 +27,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <core/bpt.h>
-#include <core/trace.h>
-#include <core/panic.h>
 #include <os/pool.h>
-#include <mu/cpu.h>
+#include <core/panic.h>
+#include <core/spinlock.h>
+#include <mm/memvar.h>
+#include <mm/tlsf.h>
 #include <mm/pmem.h>
 
-static struct pcr bsp;
+#define POOLSIZE_BYTES 0x2000000  /* 4 MiB */
+#define POOLSIZE_PAGES (POOLSIZE_BYTES / PAGESIZE)
 
-void kmain(void);
+static bool is_init = false;
+static void *pool_virt_base;
+static uintptr_t pool_pma = 0;
+static spinlock_t lock;
+tlsf_t tlsf_ctx;
 
 void
-kmain(void)
+os_pool_free(void *pool)
 {
-    /* Initialize boot protocol translation */
-    if (bpt_init() != 0) {
+    spinlock_acquire(&lock, true);
+    tlsf_free(tlsf_ctx, pool);
+    spinlock_release(&lock);
+}
+
+void *
+os_pool_allocate(size_t length)
+{
+    void *tmp;
+
+    spinlock_acquire(&lock, true);
+    tmp = tlsf_malloc(tlsf_ctx, length);
+    spinlock_release(&lock);
+    return tmp;
+}
+
+void
+os_pool_init(void)
+{
+    if (is_init) {
         return;
     }
 
-    printf("hive: engaging pmem...\n");
-    mm_pmem_init();
+    pool_pma = mm_pmem_alloc(POOLSIZE_PAGES);
+    if (pool_pma == 0) {
+        panic("pool: could not initialize root pool\n");
+    }
 
-    printf("hive: engaging root pool...\n");
-    os_pool_init();
-
-    printf("hive: configuring bsp...\n");
-    mu_cpu_conf(&bsp);
+    pool_virt_base = PHYS_TO_VIRT(pool_pma);
+    tlsf_ctx = tlsf_create_with_pool(pool_virt_base, POOLSIZE_BYTES);
+    is_init = true;
 }
