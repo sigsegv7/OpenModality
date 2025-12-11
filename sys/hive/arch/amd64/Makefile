@@ -48,7 +48,7 @@ all: $(ASMOBJECT) $(COBJ)
 	$(LD) -Tconf/link.ld $(MISC_OBJECT) $(LDFLAGS) -o $(HIVE_OUT)
 
 %.S.o: %.S
-	$(CC) -c $(SYS_CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@

@@ -27,38 +27,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-    .set PIC_MASTER_DATA, 0x21
-    .set PIC_SLAVE_DATA,  0xA1
+#include <sys/types.h>
+#include <sys/cdefs.h>
+#include <core/panic.h>
+#include <md/frame.h>
 
-    .text
-    .globl _start
-    .extern kmain
-    .extern mu_uart_init
-    .extern md_gdt_load
-    .extern md_set_vectors
-    .extern md_idt_load
-    .extern g_GDTR
-_start:
-    cli
-    cld
+/* Forward declaration */
+void trap_dispatch(struct trapframe *tf);
 
-    /*
-     * OpenModality relies on APIC operation and therefore
-     * legacy i8259 functionality must be disabled.
-     */
-    mov $0xFF, %al
-    outb %al, $PIC_MASTER_DATA
-    outb %al, $PIC_SLAVE_DATA
 
-    /* Load our own GDT */
-    lea g_GDTR(%rip), %rdi
-    call md_gdt_load
-
-    /* Load an IDT */
-    call md_set_vectors
-    call md_idt_load
-
-    call mu_uart_init
-    call kmain
-1:  hlt
-    jmp 1b
+void
+trap_dispatch(struct trapframe *tf)
+{
+    panic("fatal vector %x\n", tf->vector);
+}
