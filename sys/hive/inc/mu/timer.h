@@ -27,39 +27,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <core/bpt.h>
-#include <core/trace.h>
-#include <core/panic.h>
-#include <core/timer.h>
-#include <os/pool.h>
-#include <ob/dir.h>
-#include <mu/cpu.h>
-#include <mm/pmem.h>
+#ifndef _MU_TIMER_H_
+#define _MU_TIMER_H_ 1
 
-static struct pcr bsp;
+#define TIMER_NAMELEN 32
 
-void kmain(void);
+/* Forward declaration */
+struct timer;
 
-void
-kmain(void)
-{
-    /* Initialize boot protocol translation */
-    if (bpt_init() != 0) {
-        return;
-    }
+/*
+ * Represents the various kinds of timer
+ * types that may be found on the system.
+ *
+ * @TIMER_LOCAL:   Processor local timer (e.g., x86 TSC)
+ * @TIMER_GENERIC: Generic system timer
+ * @TIMER_SCHED:   Scheduler timer
+ */
+typedef enum {
+    TIMER_LOCAL,
+    TIMER_GENERIC,
+    TIMER_SCHED
+} timer_type_t;
 
-    printf("hive: engaging pmem...\n");
-    mm_pmem_init();
+/*
+ * Represents the collection of hooks that may
+ * be invoked on a specific timer.
+ */
+struct timer_hooks {
+    size_t(*get_count)(struct timer *timer);
+};
 
-    printf("hive: engaging root pool...\n");
-    os_pool_init();
+/*
+ * Represents a kind of timer attached
+ * to the machine.
+ *
+ * @name:  Name of this timer
+ * @hooks: Hooks that may be invoked on a specific timer
+ * @type:  The type of this timer
+ */
+struct timer {
+    char name[TIMER_NAMELEN];
+    struct timer_hooks hooks;
+    timer_type_t type;
+};
 
-    printf("hive: configuring bsp...\n");
-    mu_cpu_conf(&bsp);
+/*
+ * Initialize machine specific timer subsystems one
+ * after the other.
+ */
+void mu_timer_init(void);
 
-    printf("hive: engaging object store...\n");
-    ob_store_init();
-
-    printf("hive: engaging timers...\n");
-    timer_init();
-}
+#endif  /* !_MU_TIMER_H_ */

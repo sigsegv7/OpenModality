@@ -27,39 +27,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <core/bpt.h>
-#include <core/trace.h>
-#include <core/panic.h>
-#include <core/timer.h>
-#include <os/pool.h>
+#include <sys/types.h>
 #include <ob/dir.h>
-#include <mu/cpu.h>
-#include <mm/pmem.h>
-
-static struct pcr bsp;
-
-void kmain(void);
+#include <core/timer.h>
+#include <core/panic.h>
+#include <mu/timer.h>
 
 void
-kmain(void)
+timer_init(void)
 {
-    /* Initialize boot protocol translation */
-    if (bpt_init() != 0) {
-        return;
+    struct knode *tmr_dir;
+    int error;
+
+    error = ob_dir_new("clkdev", &tmr_dir);
+    if (error != 0) {
+        panic("timer: unable to create /clkdev\n");
     }
 
-    printf("hive: engaging pmem...\n");
-    mm_pmem_init();
+    error = ob_dir_append(tmr_dir, NULL);
+    if (error != 0) {
+        panic("timer: unable to add /clkdev\n");
+    }
 
-    printf("hive: engaging root pool...\n");
-    os_pool_init();
-
-    printf("hive: configuring bsp...\n");
-    mu_cpu_conf(&bsp);
-
-    printf("hive: engaging object store...\n");
-    ob_store_init();
-
-    printf("hive: engaging timers...\n");
-    timer_init();
+    mu_timer_init();
 }

@@ -27,39 +27,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <core/bpt.h>
-#include <core/trace.h>
+#include <sys/types.h>
 #include <core/panic.h>
-#include <core/timer.h>
-#include <os/pool.h>
-#include <ob/dir.h>
-#include <mu/cpu.h>
-#include <mm/pmem.h>
-
-static struct pcr bsp;
-
-void kmain(void);
+#include <ob/knode.h>
+#include <mu/timer.h>
+#include <md/tsc.h>
 
 void
-kmain(void)
+mu_timer_init(void)
 {
-    /* Initialize boot protocol translation */
-    if (bpt_init() != 0) {
-        return;
+    struct knode *tmr_dir;
+    int error;
+
+    error = ob_knode_resolve("/clkdev", 0, &tmr_dir);
+    if (error != 0) {
+        panic("timer[mu]: unable to resolve /clkdev\n");
     }
 
-    printf("hive: engaging pmem...\n");
-    mm_pmem_init();
-
-    printf("hive: engaging root pool...\n");
-    os_pool_init();
-
-    printf("hive: configuring bsp...\n");
-    mu_cpu_conf(&bsp);
-
-    printf("hive: engaging object store...\n");
-    ob_store_init();
-
-    printf("hive: engaging timers...\n");
-    timer_init();
+    tsc_init(tmr_dir);
 }

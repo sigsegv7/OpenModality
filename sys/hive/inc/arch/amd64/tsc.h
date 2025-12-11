@@ -27,39 +27,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <core/bpt.h>
-#include <core/trace.h>
-#include <core/panic.h>
-#include <core/timer.h>
-#include <os/pool.h>
-#include <ob/dir.h>
-#include <mu/cpu.h>
-#include <mm/pmem.h>
+#ifndef _MACHINE_TSC_H_
+#define _MACHINE_TSC_H_ 1
 
-static struct pcr bsp;
+#include <sys/types.h>
+#include <ob/knode.h>
 
-void kmain(void);
+/*
+ * Register the processor's internal timestamp
+ * counter as a clock device
+ *
+ * @clkdev_root: Where to register the TSC
+ */
+void tsc_init(struct knode *clkdev_root);
 
-void
-kmain(void)
-{
-    /* Initialize boot protocol translation */
-    if (bpt_init() != 0) {
-        return;
-    }
-
-    printf("hive: engaging pmem...\n");
-    mm_pmem_init();
-
-    printf("hive: engaging root pool...\n");
-    os_pool_init();
-
-    printf("hive: configuring bsp...\n");
-    mu_cpu_conf(&bsp);
-
-    printf("hive: engaging object store...\n");
-    ob_store_init();
-
-    printf("hive: engaging timers...\n");
-    timer_init();
-}
+#endif  /* !_MACHINE_TSC_H_ */

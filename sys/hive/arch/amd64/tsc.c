@@ -27,39 +27,63 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <core/bpt.h>
-#include <core/trace.h>
+#include <sys/types.h>
+#include <sys/cdefs.h>
+#include <mu/timer.h>
 #include <core/panic.h>
-#include <core/timer.h>
-#include <os/pool.h>
 #include <ob/dir.h>
-#include <mu/cpu.h>
-#include <mm/pmem.h>
+#include <md/tsc.h>
 
-static struct pcr bsp;
+static struct knode *tsc_knp = NULL;
 
-void kmain(void);
+/* Forward declarations */
+static struct timer_hooks tsc_hooks;
 
-void
-kmain(void)
+/*
+ * Get the current counter value from the
+ * processor's TSC.
+ */
+static size_t
+tsc_get_count(struct timer *timer)
 {
-    /* Initialize boot protocol translation */
-    if (bpt_init() != 0) {
-        return;
+    uint32_t lo, hi;
+
+    if (timer == NULL) {
+        return 0;
     }
 
-    printf("hive: engaging pmem...\n");
-    mm_pmem_init();
+    ASMV(
+        "rdtsc"
+        : "=d" (hi), "=a" (lo)
+        :
+        : "memory"
+    );
 
-    printf("hive: engaging root pool...\n");
-    os_pool_init();
-
-    printf("hive: configuring bsp...\n");
-    mu_cpu_conf(&bsp);
-
-    printf("hive: engaging object store...\n");
-    ob_store_init();
-
-    printf("hive: engaging timers...\n");
-    timer_init();
+    return ((uint64_t)hi << 32) | lo;
 }
+
+void
+tsc_init(struct knode *clkdev_root)
+{
+    int error;
+
+    if (clkdev_root == NULL) {
+        panic("tsc: bad clkdev root\n");
+    }
+
+    error = ob_knode_new("tsc", K_CLKDEV, &tsc_knp);
+    if (error != 0) {
+        panic("tsc: could not register TSC\n");
+    }
+
+    tsc_knp->data = &tsc_hooks;
+    error = ob_dir_append(tsc_knp, clkdev_root);
+    if (error != 0) {
+        panic("tsc: could not add TSC knode\n");
+    }
+
+}
+
+static struct timer_hooks tsc_hooks = {
+    .get_count = tsc_get_count
+};

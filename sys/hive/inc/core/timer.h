@@ -27,39 +27,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <core/bpt.h>
-#include <core/trace.h>
-#include <core/panic.h>
-#include <core/timer.h>
-#include <os/pool.h>
-#include <ob/dir.h>
-#include <mu/cpu.h>
-#include <mm/pmem.h>
+#ifndef _CORE_TIMER_H_
+#define _CORE_TIMER_H_ 1
 
-static struct pcr bsp;
+#include <sys/types.h>
 
-void kmain(void);
+/*
+ * Initialize system timers and counters as
+ * well as the timer object directory.
+ *
+ * Returns zero on success
+ */
+void timer_init(void);
 
-void
-kmain(void)
-{
-    /* Initialize boot protocol translation */
-    if (bpt_init() != 0) {
-        return;
-    }
-
-    printf("hive: engaging pmem...\n");
-    mm_pmem_init();
-
-    printf("hive: engaging root pool...\n");
-    os_pool_init();
-
-    printf("hive: configuring bsp...\n");
-    mu_cpu_conf(&bsp);
-
-    printf("hive: engaging object store...\n");
-    ob_store_init();
-
-    printf("hive: engaging timers...\n");
-    timer_init();
-}
+#endif  /* !_CORE_TIMER_H_ */
