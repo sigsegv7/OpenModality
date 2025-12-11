@@ -73,7 +73,6 @@ ob_root_get(const char *name, struct knode **res)
         return -ENOENT;
     }
 
-
     *res = knp_res;
     return 0;
 }
