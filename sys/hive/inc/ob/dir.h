@@ -67,6 +67,16 @@ int ob_dir_new(const char *name, struct knode **res);
 int ob_dir_append(struct knode *knp, struct knode *dir_kn);
 
 /*
+ * Obtain a knode by name from the root knode directory
+ *
+ * @name: Name to lookup
+ * @res: Result is written here
+ *
+ * Returns zero on success
+ */
+int ob_root_get(const char *name, struct knode **res);
+
+/*
  * Lookup a node within the root directory
  *
  * @type: Knode type to lookup

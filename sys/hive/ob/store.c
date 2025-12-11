@@ -28,13 +28,55 @@
  */
 
 #include <sys/types.h>
+#include <sys/cdefs.h>
+#include <sys/errno.h>
 #include <core/panic.h>
 #include <lib/stdbool.h>
+#include <lib/string.h>
 #include <ob/knode.h>
 #include <ob/dir.h>
 
 static bool is_init = false;
 static struct knode *root_dir;
+
+int
+ob_root_get(const char *name, struct knode **res)
+{
+    struct knode_dir *dir;
+    struct knode *knp, *knp_res;
+
+    if (name == NULL || res == NULL) {
+        return -EINVAL;
+    }
+
+    dir = KNODE_DIR(root_dir);
+    knp_res = NULL;
+
+    /* Is this root? */
+    if (strcmp(name, "/") == 0) {
+        *res = root_dir;
+        return 0;
+    }
+
+    TAILQ_FOREACH(knp, &dir->list, dir_link) {
+        if (LIKELY(knp->name[0] != *name)) {
+            continue;
+        }
+
+        if (strcmp(knp->name, name) == 0) {
+            knp_res = knp;
+            break;
+        }
+    }
+
+    if (knp_res == NULL) {
+        return -ENOENT;
+    }
+
+
+    *res = knp_res;
+    return 0;
+}
 
 int
 ob_root_foreach(ktype_t type, int(*cb)(struct knode *kn))
