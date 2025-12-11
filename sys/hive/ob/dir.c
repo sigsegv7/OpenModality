@@ -89,7 +89,7 @@ ob_dir_append(struct knode *knp, struct knode *dir_kn)
     }
 
     /* This must be a directory */
-    if (knp->type != K_DIR) {
+    if (dir_kn->type != K_DIR) {
         return -ENOTSUP;
     }
 
