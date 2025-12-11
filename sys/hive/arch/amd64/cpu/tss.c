@@ -27,51 +27,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <sys/errno.h>
+#include <sys/cdefs.h>
+#include <md/tss.h>
 #include <md/gdt.h>
+#include <lib/string.h>
+#include <os/pool.h>
 
-    .set PIC_MASTER_DATA, 0x21
-    .set PIC_SLAVE_DATA,  0xA1
+int
+md_tss_init(struct tss_entry *tss, struct tss_desc *desc)
+{
+    uintptr_t base;
 
-    .text
-    .globl _start
-    .extern kmain
-    .extern mu_uart_init
-    .extern md_gdt_load
-    .extern md_set_vectors
-    .extern md_idt_load
-    .extern md_tss_init
-    .extern g_GDT
-    .extern g_GDTR
-_start:
-    cli
-    cld
+    if (desc == NULL) {
+        return -EINVAL;
+    }
 
-    /*
-     * OpenModality relies on APIC operation and therefore
-     * legacy i8259 functionality must be disabled.
-     */
-    mov $0xFF, %al
-    outb %al, $PIC_MASTER_DATA
-    outb %al, $PIC_SLAVE_DATA
+    /* Allocate a new TSS if we can */
+    if (tss == NULL) {
+        tss = os_pool_allocate(sizeof(*tss));
+        if (tss == NULL) {
+            return -1;
+        }
+    }
 
-    /* Load our own GDT */
-    lea g_GDTR(%rip), %rdi
-    call md_gdt_load
+    memset(tss, 0, sizeof(*tss));
+    base = (uintptr_t)tss;
 
-    /* Load an IDT */
-    call md_set_vectors
-    call md_idt_load
+    desc->base_low = base & 0xFFFF;
+    desc->base_mid = (base >> 16) & 0xFF;
+    desc->base_mid1 = (base >> 24) & 0xFF;
+    desc->base_high = (base >> 32) & 0xFFFFFFFF;
 
-    /* Load the TSS */
-    lea g_GDT(%rip), %rsi
-    add $GDT_TSS, %rsi
-    lea bsp_tss(%rip), %rdi
-    call md_tss_init
+    desc->avl = 0;          /* Unused */
+    desc->dpl = 0;          /* Kernel only */
+    desc->p   = 1;          /* Present */
+    desc->type = 0x9;       /* TSS */
 
-    call mu_uart_init
-    call kmain
-1:  hlt
-    jmp 1b
+    ASMV(
+        "str %%ax\n\t"
+        "mov %0, %%ax\n\t"
+        "ltr %%ax"
+        :
+        : "i" (GDT_TSS | 3)
+        : "memory", "ax"
+    );
 
-    .section .data
-bsp_tss: .fill 108, 1, 0
+    return 0;
+}
