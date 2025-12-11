@@ -68,9 +68,24 @@ int
 ob_dir_append(struct knode *knp, struct knode *dir_kn)
 {
     struct knode_dir *dir;
+    int error;
 
-    if (knp == NULL || dir_kn == NULL) {
+    if (knp == NULL) {
         return -EINVAL;
+    }
+
+    /*
+     * If the destination directory to append
+     * the knode to is specified as NULL, attempt
+     * to default at the root.
+     */
+    if (dir_kn == NULL) {
+        error = ob_root_get("/", &dir_kn);
+        if (error != 0)
+            return error;
+    }
+    if (dir_kn == NULL) {
+        return -ENOENT;
     }
 
     /* This must be a directory */
