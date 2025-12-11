@@ -94,6 +94,8 @@ ob_knode_new(const char *name, ktype_t type, struct knode **res)
     }
 
     memcpy(knp->name, name, name_len);
+    knp->name[name_len] = '\0';
+
     knp->type = type;
     knp->ref = 1;
     *res = knp;
