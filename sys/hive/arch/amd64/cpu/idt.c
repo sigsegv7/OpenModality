@@ -39,7 +39,7 @@ static struct idtr idtr = {
 };
 
 void
-idt_set_entry(uint8_t vector, uint8_t type, uintptr_t isr, uint8_t ist)
+md_idt_set(uint8_t vector, uint8_t type, uintptr_t isr, uint8_t ist)
 {
     struct idt_gate *gate;
 
@@ -58,7 +58,7 @@ idt_set_entry(uint8_t vector, uint8_t type, uintptr_t isr, uint8_t ist)
 }
 
 void
-idt_load(void)
+md_idt_load(void)
 {
     ASMV(
         "lidt %0"

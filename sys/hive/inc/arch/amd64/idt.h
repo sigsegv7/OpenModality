@@ -74,12 +74,12 @@ struct PACKED idtr {
  * @isr: Interrupt service routine
  * @ist: Interrupt stack
  */
-void idt_set_entry(uint8_t vector, uint8_t type, uintptr_t isr, uint8_t ist);
+void md_idt_set(uint8_t vector, uint8_t type, uintptr_t isr, uint8_t ist);
 
 /*
  * Load the interrupt descriptor table
  */
-void idt_load(void);
+void md_idt_load(void);
 
 #endif  /* __ASSEMBLER__ */
 #endif  /* !_MACHINE_IDT_H_ */
