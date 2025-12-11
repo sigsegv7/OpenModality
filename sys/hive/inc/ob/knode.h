@@ -79,4 +79,15 @@ struct knode {
  */
 int ob_knode_new(const char *name, ktype_t type, struct knode **res);
 
+/*
+ * Resolve a knode by path
+ *
+ * @path: Path to resolve
+ * @flags: Optional flags
+ * @res: Result pointer is written here
+ *
+ * Returns zero on success
+ */
+int ob_knode_resolve(const char *path, int flags, struct knode **res);
+
 #endif  /* !_OB_KNODE_H_ */
