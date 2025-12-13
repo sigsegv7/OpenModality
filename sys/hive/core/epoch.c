@@ -35,6 +35,7 @@
 #include <os/pool.h>
 #include <ob/dir.h>
 #include <mu/cpu.h>
+#include <mu/pmap.h>
 #include <mm/pmem.h>
 
 static struct pcr bsp;
@@ -54,6 +55,9 @@ kmain(void)
 
     printf("hive: engaging root pool...\n");
     os_pool_init();
+
+    printf("hive: engaging pmap layer...\n");
+    mu_pmap_init();
 
     printf("hive: configuring bsp...\n");
     mu_cpu_conf(&bsp);

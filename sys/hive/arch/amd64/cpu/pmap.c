@@ -271,3 +271,20 @@ mu_pmap_map(struct mu_vas *vas, uintptr_t vma, uintptr_t pma, int prot,
     pmap_invlpg(vma);
     return 0;
 }
+
+void
+mu_pmap_init(void)
+{
+    struct mu_vas vas;
+    uintptr_t *toplevel;
+
+    /* Tear down the lower half */
+    mu_pmap_readvas(&vas);
+    toplevel = PHYS_TO_VIRT((vas.cr3 & PTE_ADDR_MASK));
+    for (int i = 0; i < 256; ++i) {
+        toplevel[i] = 0;
+    }
+
+    /* Flush the entire TLB */
+    mu_pmap_writevas(&vas);
+}

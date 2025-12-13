@@ -45,6 +45,11 @@ typedef enum {
 } pagesize_t;
 
 /*
+ * Initialize the pagemap subsystem
+ */
+void mu_pmap_init(void);
+
+/*
  * Read the current virtual address space
  */
 int mu_pmap_readvas(struct mu_vas *res);
