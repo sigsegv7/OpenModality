@@ -27,45 +27,14 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-CC = @CC@
-LD = @LD@
-ARCH = @ARCH@
-SDKROOT = @SDKROOT@
-BOOT_PROTO = @BOOT_PROTO@
-ISO = oxide.iso
-SYS_CFLAGS = @SYS_CFLAGS@
-OMAR = $(shell pwd)/tools/omar/bin/omar
-SYSROOT = root
-MEMAR = $(shell pwd)/gen/bin/memar
+CC =
+LD =
+SYS_CFLAGS =
+ASMFILES = rts.S
+LINKER_SCRIPT = ../../../user/link.ld
+OUTPUT_FILE = ../../../root/sbin/rts
 
 .PHONY: all
-all: $(SYSROOT) sdk service hive initrd iso
-
-.PHONY: hive
-hive:
-	cd sys/hive/; make ARCH=$(ARCH) CC=$(CC) LD=$(LD) SYS_CFLAGS="$(SYS_CFLAGS)" \
-		SDKROOT=$(SDKROOT) BOOT_PROTO="$(BOOT_PROTO)"
-
-.PHONY: service
-service:
-	cd admin/service/; make ARCH=$(ARCH) CC=$(CC) LD=$(LD) SYS_CFLAGS="$(SYS_CFLAGS)" \
-		SDKROOT=$(SDKROOT) BOOT_PROTO="$(BOOT_PROTO)"
-
-.PHONY: initrd
-initrd:
-	$(MEMAR) -i root
-
-.PHONY: iso
-iso:
-	bash tools/iso-limine.sh
-
-.PHONY: $(SYSROOT)
-$(SYSROOT):
-	mkdir -p $(SYSROOT)/
-	mkdir -p $(SYSROOT)/boot/
-	mkdir -p $(SYSROOT)/usr/include/
-	mkdir -p $(SYSROOT)/sbin/
-
-.PHONY: sdk
-sdk:
-	cd sdk/; make ARCH=$(ARCH) CC=$(CC) SYS_CFLAGS="$(SYS_CFLAGS)"
+all:
+	$(CC) -c $(SYS_CFLAGS) $(ASMFILES) -o rts.o
+	$(LD) -T$(LINKER_SCRIPT) rts.o -o $(OUTPUT_FILE)

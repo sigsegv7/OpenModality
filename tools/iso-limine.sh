@@ -7,6 +7,9 @@ mkdir -p iso_root/boot/
 # Copy the kernel to the ISO root
 cp sys/hive/hive.sys iso_root/boot
 
+# Copy the initrd
+cp initrd.mr iso_root/boot
+
 # Copy boot files
 cp admin/conf/limine.conf sys/boot/limine/limine-bios.sys \
     sys/boot/limine/limine-bios-cd.bin \
