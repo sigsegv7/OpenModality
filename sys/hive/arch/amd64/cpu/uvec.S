@@ -27,84 +27,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/types.h>
-#include <sys/cdefs.h>
-#include <sys/param.h>
-#include <core/bpt.h>
-#include <core/panic.h>
-#include <lib/string.h>
+#include <md/gdt.h>
 
-#define INITRD_PATH "/boot/initrd.mr"
-#define MEMAR_MAGIC "LORD"
-#define MEMAR_MAGIC_LEN 4
-#define FILE_NAME_MAX 99
+    .set DEFAULT_RFLAGS, 0x202
+    .text
+    .globl mu_proc_uvector
+mu_proc_uvector:
+    xor %rbp, %rbp              /* Terminate callstack */
+    mov $GDT_UDATA, %rax        /* USER DS */
+    or $3, %rax                 /* RPL 3 */
+    push %rax                   /* IRET.SS */
+    push %rsi                   /* IRET.RSP */
 
-static struct bpt_module initrd;
-
-/*
- * Represents a header that sits on top of each file
- * in the archive
- *
- * @hdr_size: Length of the header
- * @name: Filename
- *
- * This format is as follows:
- *
- * < FILE HEADER   >
- * < FILE CONTENTS >
- * < PADDING >
- * ...
- */
-struct PACKED file_hdr {
-    char magic[MEMAR_MAGIC_LEN];
-    size_t hdr_size;
-    size_t file_size;
-    uint8_t fname_size;
-    char name[FILE_NAME_MAX];
-};
-
-void *
-initrd_lookup(const char *path)
-{
-    struct file_hdr *hdr;
-    char *p, *p_end;
-
-    if (path == NULL) {
-        return NULL;
-    }
-
-    if (*path == '/') {
-        ++path;
-    }
-
-    if ((p = initrd.address) == NULL) {
-        return NULL;
-    }
-
-    p_end = PTR_OFFSET(p, initrd.length);
-    while (p < p_end) {
-        hdr = (struct file_hdr *)p;
-        if (memcmp(hdr->magic, MEMAR_MAGIC, MEMAR_MAGIC_LEN) != 0) {
-            return NULL;
-        }
-
-        if (memcmp(hdr->name, path, hdr->fname_size) == 0) {
-            return PTR_OFFSET(hdr, hdr->hdr_size);
-        }
-
-        p = PTR_OFFSET(hdr, hdr->file_size + hdr->hdr_size);
-    }
-
-    return NULL;
-}
-
-void
-initrd_init(void)
-{
-    int error;
-
-    error = bpt_get_module(INITRD_PATH, &initrd);
-    if (error != 0) {
-        panic("initrd: could not find \"%s\"\n", INITRD_PATH);
-    }
-}
+    mov $DEFAULT_RFLAGS, %rax   /* Default RFLAGS */
+    push %rax                   /* IRET.RFLAGS */
+    mov $GDT_UCODE, %rax        /* USER CS */
+    or $3, %rax                 /* RPL 3 */
+    push %rax                   /* IRET.CS */
+    push %rdi                   /* IRET.IP */
+    lfence                      /* Don't speculate past swapgs */
+    swapgs                      /* Get user GS base */
+    iretq

@@ -27,20 +27,67 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <sys/cdefs.h>
 #include <core/bpt.h>
 #include <core/trace.h>
 #include <core/panic.h>
 #include <core/timer.h>
+#include <core/initrd.h>
+#include <core/elfload.h>
 #include <acpi/acpi.h>
 #include <os/pool.h>
 #include <ob/dir.h>
 #include <mu/cpu.h>
 #include <mu/pmap.h>
 #include <mm/pmem.h>
+#include <mm/memvar.h>
+
+#define RTS_PATH "/sbin/rts"
 
 static struct pcr bsp;
 
 void kmain(void);
+
+NORETURN static void
+start_rts(void)
+{
+    uintptr_t stack;
+    struct loaded_elf elf;
+    struct mu_vas vas;
+    void *data;
+    int error;
+
+    if (mu_pmap_readvas(&vas) != 0) {
+        panic("hive: unable to read VAS for loading\n");
+    }
+
+    if ((stack = mm_pmem_alloc(1)) == 0) {
+        panic("hive: unable to allocate user stack\n");
+    }
+
+    error = mu_pmap_map(
+        &vas,
+        stack,
+        stack,
+        PROT_READ | PROT_WRITE | PROT_USER,
+        PAGESIZE_4K
+    );
+
+    if (error != 0) {
+        panic("hive: unable to map stack\n");
+    }
+
+    if ((data = initrd_lookup(RTS_PATH)) == NULL) {
+        panic("hive: unable to lookup \"%s\"\n", RTS_PATH);
+    }
+
+    if ((elf_load_raw(&vas, data, &elf)) != 0) {
+        panic("hive: unable to load \"%s\"\n", RTS_PATH);
+    }
+
+    stack += PAGESIZE - 1;
+    mu_proc_uvector(elf.entrypoint, stack);
+}
 
 void
 kmain(void)
@@ -70,4 +117,10 @@ kmain(void)
 
     printf("hive: engaging acpi...\n");
     acpi_init();
+
+    printf("hive: engaging initrd...\n");
+    initrd_init();
+
+    printf("hive: bringing up rts...\n");
+    start_rts();
 }
