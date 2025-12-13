@@ -183,36 +183,31 @@ pmem_alloc(size_t count)
 {
     ssize_t start_idx = -1;
     size_t frames_found = 0;
-    uintptr_t phys = 0;
+    uintptr_t start, end;
     size_t max_bit;
 
     max_bit = usable_top / PAGESIZE;
     for (size_t i = last_bit; i < max_bit; ++i) {
-        if (TESTBIT(bitmap, i)) {
-            frames_found = 0;
-            start_idx = -1;
+        if (!TESTBIT(bitmap, i)) {
+            if (start_idx < 0)
+                start_idx = i;
+            if ((++frames_found) >= count)
+                break;
+
             continue;
         }
 
-        /* Keep track of region start */
-        if (start_idx < 0) {
-            start_idx = i;
-        }
-
-        /* Did we find the requested count? */
-        if ((frames_found++) >= count) {
-            phys = start_idx * PAGESIZE;
-            break;
-        }
+        start_idx = -1;
     }
 
-    if (phys != 0) {
-        for (size_t i = start_idx; i < start_idx + count; ++i) {
-            SETBIT(bitmap, i);
-        }
+    if (start_idx < 0) {
+        return 0;
     }
 
-    return phys;
+    start = start_idx * PAGESIZE;
+    end = start + (count * PAGESIZE);
+    bitmap_set_range(start, end, true);
+    return start;
 }
 
 uintptr_t
