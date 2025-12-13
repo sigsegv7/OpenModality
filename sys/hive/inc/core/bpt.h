@@ -61,9 +61,11 @@ typedef enum {
  * boot protocol currently in-use.
  *
  * @kernel_base: Virtual kernel load base
+ * @rsdp_base: Base address of ACPI RSDP
  */
 struct bpt_vars {
     uintptr_t kernel_base;
+    void *rsdp_base;
 };
 
 /*
