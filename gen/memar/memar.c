@@ -72,6 +72,7 @@ static char file_pad[FILE_ALIGN] = {0};
 struct __attribute__((packed)) file_hdr {
     char magic[MEMAR_MAGIC_LEN];
     size_t hdr_size;
+    size_t file_size;
     char name[FILE_NAME_MAX];
 };
 
@@ -92,7 +93,7 @@ help(void)
  * Initializes a file header and returns the length
  */
 static size_t
-file_hdr_init(const char *name, struct file_hdr *hdr)
+file_hdr_init(const char *name, size_t file_sz, struct file_hdr *hdr)
 {
     size_t name_len;
 
@@ -115,6 +116,7 @@ file_hdr_init(const char *name, struct file_hdr *hdr)
     memcpy(hdr->name, name, name_len);
     memcpy(hdr->magic, MEMAR_MAGIC, MEMAR_MAGIC_LEN);
     hdr->hdr_size = name_len;
+    hdr->file_size = file_sz;
     hdr->hdr_size += sizeof(struct file_hdr) - FILE_NAME_MAX;
     return hdr->hdr_size;
 }
@@ -153,7 +155,7 @@ write_file(int out_fd, const char *path)
     }
 
     /* Initialize the header */
-    hdr_size = file_hdr_init(path, &hdr);
+    hdr_size = file_hdr_init(path, real_size, &hdr);
 
     /* Compute the length of padding */
     align_size = ALIGN_UP(real_size, FILE_ALIGN);
