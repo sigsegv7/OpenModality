@@ -38,6 +38,7 @@ CFILES += $(shell find ../bpt -name "*.c")
 CFILES += $(shell find ../mm -name "*.c")
 CFILES += $(shell find ../os -name "*.c")
 CFILES += $(shell find ../ob -name "*.c")
+CFILES += $(shell find ../acpi -name "*.c")
 OFILES = $(CFILES:.c=.o)
 CFLAGS = -I../inc/ -I../target/inc/ 	   \
 		 -I../../../sdk/inc/ $(SYS_CFLAGS) \

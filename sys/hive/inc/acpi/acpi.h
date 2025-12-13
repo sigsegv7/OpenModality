@@ -27,43 +27,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <core/bpt.h>
-#include <core/trace.h>
-#include <core/panic.h>
-#include <core/timer.h>
-#include <acpi/acpi.h>
-#include <os/pool.h>
-#include <ob/dir.h>
-#include <mu/cpu.h>
-#include <mm/pmem.h>
+#ifndef _ACPI_ACPI_H_
+#define _ACPI_ACPI_H_
 
-static struct pcr bsp;
+#include <sys/types.h>
 
-void kmain(void);
+/*
+ * Initialize the ACPI subsystem
+ */
+void acpi_init(void);
 
-void
-kmain(void)
-{
-    /* Initialize boot protocol translation */
-    if (bpt_init() != 0) {
-        return;
-    }
+/*
+ * Read the multiple APIC descriptor table
+ */
+int acpi_read_madt(uint32_t type, int(*cb)(struct apic_header *, size_t), size_t arg);
 
-    printf("hive: engaging pmem...\n");
-    mm_pmem_init();
+/*
+ * Query an ACPI table
+ */
+void *acpi_query(const char *s);
 
-    printf("hive: engaging root pool...\n");
-    os_pool_init();
-
-    printf("hive: configuring bsp...\n");
-    mu_cpu_conf(&bsp);
-
-    printf("hive: engaging object store...\n");
-    ob_store_init();
-
-    printf("hive: engaging timers...\n");
-    timer_init();
-
-    printf("hive: engaging acpi...\n");
-    acpi_init();
-}
+#endif  /* !_ACPI_ACPI_H_ */
