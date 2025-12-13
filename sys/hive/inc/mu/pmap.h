@@ -50,6 +50,11 @@ typedef enum {
 int mu_pmap_readvas(struct mu_vas *res);
 
 /*
+ * Write a VAS to be used as the current
+ */
+int mu_pmap_writevas(struct mu_vas *vas);
+
+/*
  * Create a virtual to physical memory mapping
  *
  * @vas: Virtual address space to map within

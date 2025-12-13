@@ -139,6 +139,23 @@ mu_pmap_readvas(struct mu_vas *res)
     return 0;
 }
 
+int
+mu_pmap_writevas(struct mu_vas *vas)
+{
+    if (vas == NULL) {
+        return -1;
+    }
+
+    ASMV(
+        "mov %0, %%cr3"
+        :
+        : "r" (vas->cr3)
+        : "memory"
+    );
+
+    return 0;
+}
+
 /*
  * Convert system protection flags into machine
  * page table bits
