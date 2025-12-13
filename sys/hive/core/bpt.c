@@ -65,6 +65,16 @@ bpt_get_mementry(size_t index, struct bpt_mementry *res)
 }
 
 int
+bpt_get_module(const char *name, struct bpt_module *res)
+{
+    if (hooks.get_module == NULL) {
+        return -1;
+    }
+
+    return hooks.get_module(name, res);
+}
+
+int
 bpt_init(void)
 {
     /*

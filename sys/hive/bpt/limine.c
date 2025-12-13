@@ -27,8 +27,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <sys/errno.h>
 #include <core/bpt.h>
 #include <boot/limine.h>
+#include <lib/string.h>
 
 /* Memory map */
 static struct limine_memmap_response *memmap_resp;
@@ -50,6 +52,34 @@ static volatile struct limine_rsdp_request rsdp_req = {
     .id = LIMINE_RSDP_REQUEST,
     .revision = 0
 };
+
+/* Module request */
+static struct limine_module_response *mod_resp;
+static volatile struct limine_module_request mod_req = {
+    .id = LIMINE_MODULE_REQUEST,
+    .revision = 0
+};
+
+static int
+limine_get_module(const char *name, struct bpt_module *res)
+{
+    struct limine_file *file;
+
+    if (name == NULL || res == NULL) {
+        return -EINVAL;
+    }
+
+    for (size_t i = 0; i < mod_resp->module_count; ++i) {
+        file = mod_resp->modules[i];
+        if (strcmp(file->path, name) == 0) {
+            res->address = file->address;
+            res->length = file->size;
+            return 0;
+        }
+    }
+
+    return -ENOENT;
+}
 
 /*
  * Acquire static / unchanging variables from the
@@ -94,9 +124,11 @@ bpt_init_limine(struct bpt_hooks *hooks)
     hhdm_resp = hhdm_req.response;
     memmap_resp = memmap_req.response;
     rsdp_resp = rsdp_req.response;
+    mod_resp = mod_req.response;
 
     /* Set hooks */
     hooks->get_vars = limine_get_vars;
     hooks->get_mementry = limine_get_mementry;
+    hooks->get_module = limine_get_module;
     return 0;
 }

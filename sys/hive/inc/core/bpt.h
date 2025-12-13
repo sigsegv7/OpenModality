@@ -69,6 +69,18 @@ struct bpt_vars {
 };
 
 /*
+ * Represents a module provided by the
+ * bootloader
+ *
+ * @address: Address of the first byte of data
+ * @length: Number of bytes total
+ */
+struct bpt_module {
+    void *address;
+    size_t length;
+};
+
+/*
  * Represents a memory map entry
  *
  * @base: Base of memory area
@@ -88,6 +100,7 @@ struct bpt_mementry {
 struct bpt_hooks {
     int(*get_vars)(struct bpt_vars *res);
     int(*get_mementry)(size_t index, struct bpt_mementry *res);
+    int(*get_module)(const char *name, struct bpt_module *res);
 };
 
 /*
@@ -106,6 +119,16 @@ int bpt_get_vars(struct bpt_vars *res);
  * of memory entry list or error.
  */
 int bpt_get_mementry(size_t index, struct bpt_mementry *res);
+
+/*
+ * Acquire a module from the bootloader
+ *
+ * @name: Filename to acquire
+ * @res: Result is written here
+ *
+ * Returns zero on success
+ */
+int bpt_get_module(const char *name, struct bpt_module *res);
 
 /*
  * Initialize the boot protocol translation layer
