@@ -31,6 +31,7 @@
 #define _ACPI_ACPI_H_
 
 #include <sys/types.h>
+#include <acpi/tables.h>
 
 /*
  * Initialize the ACPI subsystem
