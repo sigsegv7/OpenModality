@@ -67,8 +67,6 @@ void *
 initrd_lookup(const char *path)
 {
     struct file_hdr *hdr;
-    off_t next_off;
-    size_t fname_size;
     char *p, *p_end;
 
     if (path == NULL) {
