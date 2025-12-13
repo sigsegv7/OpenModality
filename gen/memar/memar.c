@@ -100,6 +100,12 @@ file_hdr_init(const char *name, struct file_hdr *hdr)
         return 0;
     }
 
+    /* Skip the root of the archive name */
+    while (*name != '/' && *name != '\0') {
+        ++name;
+    }
+    ++name;
+
     /* Truncate name if needed */
     name_len = strlen(name);
     if (name_len >= FILE_NAME_MAX - 1) {
